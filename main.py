@@ -4,11 +4,10 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# 1. Paste YOUR assigned Issuer and Audience from your grader screen
+# Your exact assigned values from the grader
 EXPECTED_ISSUER = "https://idp.exam.local"
 EXPECTED_AUDIENCE = "tds-int741g8.apps.exam.local"
 
-# 2. Paste YOUR exact public key block inside this multi-line string
 PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2okOHspNjG+2rTLbeuY
 cxIP/HG8C6sb9iwg3yiAA4HCNpITcbkCselbvbYGu3EbNy4xFyf5cbJ5DHJMlD
@@ -25,7 +24,7 @@ class TokenRequest(BaseModel):
 @app.post("/verify")
 async def verify_token(payload: TokenRequest):
     try:
-        # Decode and verify the JWT using RS256, public key, issuer, and audience
+        # Decode and verify the JWT using RS256 and your exact public key
         decoded_payload = jwt.decode(
             payload.token,
             PUBLIC_KEY,
@@ -35,7 +34,7 @@ async def verify_token(payload: TokenRequest):
             options={"verify_exp": True}
         )
         
-        # If valid, return 200 with the requested claims
+        # Return success with claims if valid
         return {
             "valid": True,
             "email": decoded_payload.get("email"),
@@ -43,7 +42,7 @@ async def verify_token(payload: TokenRequest):
             "aud": decoded_payload.get("aud")
         }
     except Exception:
-        # If signature fails, expired, wrong issuer/audience, or tampered -> return 401 & valid: false
+        # If any rule fails (signature, exp, iss, aud), return 401 with valid: False
         raise HTTPException(
             status_code=401,
             detail={"valid": False}
