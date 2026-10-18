@@ -42,6 +42,6 @@ async def verify_token(payload: TokenRequest, response: Response):
             "aud": decoded_payload.get("aud")
         }
     except Exception:
-        # Set status to 401 and return plain dict (no "detail" wrapper ever)
+        # Set status to 401 and return plain dict directly at the root (no "detail" wrapper)
         response.status_code = 401
         return {"valid": False}
