@@ -4,18 +4,18 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# Your exact assigned values from the grader
+# Your exact assigned values from the current prompt
 EXPECTED_ISSUER = "https://idp.exam.local"
 EXPECTED_AUDIENCE = "tds-int741g8.apps.exam.local"
 
-# Fixed public key with the correct base64 character (/)
+# The fresh, unique public key from your current session
 PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2okOHspNjG+2rTLbeuY
-cxIP/HG8C6sb9iwg3yiAA4HCNpITcbkCselbvbYGu3EbNy4xFyf5cbJ5DHJMlD
-EkryOgdy2GiiIIBOUj8S63uGCnRPObH9NFatfNwheKuzsPuN1du6A9cNtEnpXc
-WyjJG2axvfmq7i65ukr13oWYG7xTTAuKPujS14otzqfD3h5NepzdFXpr280NnzFw
-ed+zclR68cmNNo/kWF34x/yCLSf08COGDTgW6PdaChd119VdetJzvEgC5tkyUxsFI
-SI6iyrvbK80NEBSqq4XkadeJsCs4F1Rcnss4Llgmit7GlkL9Mce3b0wGLs9/7ZIX
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2okOHspNjgA+2rTLbeuY
+cxiP/hG8C6Sb9iwg3yiLAA4HCnpITcbWCSelbvbYGuc3EbNy4xFyf5Cbj5DHJMID
+EkryOgyd2giIIIBOUBj8S63uGcnRpOBh9NFatfNwheKuzsPuN1du6A9cNteNpXc
+WyJjG2axVfmq7i6SuKr1JoWYG7xTTAvKPujSl4OtsQfO3h5NepzdfXpr280NnzfW
+ed+zclR6BcmNNo/WVfJ4xyCLSf0BCOgdTgW6PdaChd119VdetJZVEgC5tkyvXsfI
+SI6iyrYbKR0NEBSqq4XkadEjsCs4F1Rcnss4LlgniT7GlkL9Mce3b0wGLs9/7ZIX
 dQIDAQAB
 -----END PUBLIC KEY-----"""
 
@@ -25,7 +25,7 @@ class TokenRequest(BaseModel):
 @app.post("/verify")
 async def verify_token(payload: TokenRequest):
     try:
-        # Decode and verify the JWT against all rules (Signature, iss, aud, exp)
+        # Decode and verify the JWT using RS256, issuer, audience, and expiry
         decoded_payload = jwt.decode(
             payload.token,
             PUBLIC_KEY,
@@ -35,7 +35,7 @@ async def verify_token(payload: TokenRequest):
             options={"verify_exp": True}
         )
         
-        # On valid token, return 200 with required echoed claims
+        # On a valid token, return 200 with required echoed claims
         return {
             "valid": True,
             "email": decoded_payload.get("email"),
