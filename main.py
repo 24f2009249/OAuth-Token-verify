@@ -1,6 +1,5 @@
 import jwt
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Response
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -23,7 +22,7 @@ class TokenRequest(BaseModel):
     token: str
 
 @app.post("/verify")
-async def verify_token(payload: TokenRequest):
+async def verify_token(payload: TokenRequest, response: Response):
     try:
         # Decode and verify the JWT using RS256, issuer, audience, and expiry
         decoded_payload = jwt.decode(
@@ -43,8 +42,6 @@ async def verify_token(payload: TokenRequest):
             "aud": decoded_payload.get("aud")
         }
     except Exception:
-        # Return 401 with {"valid": false} directly at the root (no "detail" wrapper)
-        return JSONResponse(
-            status_code=401,
-            content={"valid": False}
-        )
+        # Set status to 401 and return plain dict (no "detail" wrapper ever)
+        response.status_code = 401
+        return {"valid": False}
