@@ -46,5 +46,5 @@ async def verify_token(payload: TokenRequest):
         # If signature fails, expired, wrong issuer/audience, or tampered -> return 401 & valid: false
         raise HTTPException(
             status_code=401,
-            detail={"valid": false}
+            detail={"valid": False}
         )
