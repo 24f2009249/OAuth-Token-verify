@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# Your exact assigned values from the grader
 EXPECTED_ISSUER = "https://idp.exam.local"
 EXPECTED_AUDIENCE = "tds-int741g8.apps.exam.local"
 
@@ -24,7 +23,6 @@ class TokenRequest(BaseModel):
 @app.post("/verify")
 async def verify_token(payload: TokenRequest):
     try:
-        # Decode and verify the JWT using RS256 and your exact public key
         decoded_payload = jwt.decode(
             payload.token,
             PUBLIC_KEY,
@@ -33,16 +31,15 @@ async def verify_token(payload: TokenRequest):
             issuer=EXPECTED_ISSUER,
             options={"verify_exp": True}
         )
-        
-        # Return success with claims if valid
         return {
             "valid": True,
             "email": decoded_payload.get("email"),
             "sub": decoded_payload.get("sub"),
             "aud": decoded_payload.get("aud")
         }
-    except Exception:
-        # If any rule fails (signature, exp, iss, aud), return 401 with valid: False
+    except Exception as e:
+        # Print the exact error to Render logs so we can see what failed
+        print(f"VERIFICATION FAILED: {type(e).__name__} - {str(e)}")
         raise HTTPException(
             status_code=401,
             detail={"valid": False}
